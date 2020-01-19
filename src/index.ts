@@ -4,8 +4,7 @@ import * as express from 'express';
 import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
 
-import { Plan } from './entity/Plan';
-import createPlan from './operations/create-plan';
+import createPlan, { PlanRequest } from './operations/create-plan';
 
 config();
 
@@ -25,7 +24,7 @@ createConnection({
     app.use(bodyParser.urlencoded({ extended: false }));
 
     app.post('/webhook', async (req, res) => {
-      const plan = req.body as Plan;
+      const plan = req.body as PlanRequest;
       if (!plan.amount) {
         return res.status(422).json({
           message: "Plan must contain 'amount' field to specify price in cents per build",
@@ -36,7 +35,7 @@ createConnection({
         return res.status(422).json({ message: "Plan must contain a currency, e.g. 'usd'" });
       }
 
-      if (!plan.interval) {
+      if (!plan.interval || !['month', 'year'].includes(plan.interval)) {
         return res
           .status(422)
           .json({ message: "Plan must contain an interval of 'month' or 'year'" });
