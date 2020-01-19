@@ -3,6 +3,7 @@ import StripeClient from 'stripe';
 import { validate as validateEmail } from 'email-validator';
 
 import { Plan } from '../entity/Plan';
+import stripeClient from '../utils/stripe';
 
 /* I suspect this doesn't accurately represent the plan we want.
  * The way it was described to me, we have a base fee that allows
@@ -94,10 +95,7 @@ export async function createPlan(req: PlanRequest) {
     return;
   }
 
-  const stripe = new StripeClient(process.env.STRIPE_SECRET, {
-    apiVersion: '2019-12-03',
-    typescript: true,
-  });
+  const stripe = stripeClient();
 
   try {
     await stripe.plans.create({
