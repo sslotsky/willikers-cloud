@@ -28,7 +28,7 @@
   },
   "scripts": {
     "start": "ts-node-dev --respawn src/index.ts",
-    "test": "jest",
+    "test": "jest --runInBand",
     "test:debug": "node --inspect-brk node_modules/.bin/jest --runInBand"
   },
   "jest": {

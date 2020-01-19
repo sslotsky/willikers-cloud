@@ -139,10 +139,6 @@ describe('webhook', () => {
         .send(req);
 
       expect(res.status).toBe(200);
-      //const repo = getRepository(Plan);
-      //const plans = await repo.find({ name: planName(req) });
-      //console.log(plans);
-      //expect(plans).toHaveLength(1);
     });
   });
 });

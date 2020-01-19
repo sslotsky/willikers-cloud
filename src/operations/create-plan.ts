@@ -1,4 +1,4 @@
-import { getRepository } from 'typeorm';
+import { getRepository, Repository } from 'typeorm';
 import { validate as validateEmail } from 'email-validator';
 
 import { Plan } from '../entity/Plan';
@@ -26,12 +26,13 @@ export function planName(req: PlanRequest) {
   return `${req.amount}-${req.currency}-${req.interval}`;
 }
 
-async function savePlan(req: PlanRequest) {
+async function savePlan(req: PlanRequest, repo: Repository<Plan>) {
   const plan = new Plan();
   plan.amount = req.amount;
   plan.currency = req.currency;
   plan.interval = req.interval;
   plan.name = planName(req);
+  await repo.save(plan);
 }
 
 class EmailInvalidError extends Error {
@@ -106,14 +107,14 @@ export async function createPlan(req: PlanRequest) {
     /* Stripe successfully created the plan, so let's save a reflection
      * of that plan to our database.
      */
-    await savePlan(req);
+    await savePlan(req, repo);
     return;
   } catch (e) {
     if (e.raw.code === 'resource_already_exists') {
       /* This plan exists in stripe, but isn't reflected in our database.
        * Let's fix that and save it, and return successfully.
        */
-      await savePlan(req);
+      await savePlan(req, repo);
       return;
     }
 

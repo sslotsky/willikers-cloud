@@ -3,10 +3,10 @@ import { getRepository } from 'typeorm';
 
 import stripeClient from '../utils/stripe';
 import { Plan } from '../entity/Plan';
-import { planName, PlanRequest } from '../operations/create-plan';
+import { planName, PlanRequest } from './create-plan';
 import { createPlan } from './create-plan';
 
-jest.mock('./utils/stripe', () => () => ({
+jest.mock('../utils/stripe', () => () => ({
   plans: {
     create: jest.fn(),
   },
@@ -18,7 +18,7 @@ describe('createPlan', () => {
       type: 'sqlite',
       database: 'memory',
       dropSchema: true,
-      entities: [__dirname + '/entity/*{.js,.ts}'],
+      entities: [Plan],
       synchronize: true,
     });
   });
@@ -70,6 +70,24 @@ describe('createPlan', () => {
       it('should not create a new plan', async () => {
         const client = stripeClient();
         client.plans.create = jest.fn().mockResolvedValue({});
+
+        await createPlan(req);
+
+        const repo = getRepository(Plan);
+        const plans = await repo.find({ name: planName(req) });
+        console.log(plans);
+        expect(plans).toHaveLength(1);
+      });
+    });
+
+    describe('when the plan already exists in stripe', () => {
+      it('saves it to the database', async () => {
+        const client = stripeClient();
+        client.plans.create = jest.fn().mockRejectedValue({
+          raw: {
+            code: 'resource_already_exists',
+          },
+        });
 
         const req: PlanRequest = {
           amount: 5000,
