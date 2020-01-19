@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, Index } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, Index } from 'typeorm';
 
 @Entity()
 export class Plan {
@@ -9,12 +9,12 @@ export class Plan {
   @Column()
   name: string;
 
-  @Column("int")
+  @Column('int')
   amount: number;
 
   @Column()
   currency: string;
 
   @Column()
-  interval: "string";
+  interval: 'month' | 'year';
 }

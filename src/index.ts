@@ -5,6 +5,7 @@ import * as bodyParser from 'body-parser';
 import { config } from 'dotenv';
 
 import { Plan } from './entity/Plan';
+import createPlan from './operations/create-plan';
 
 config();
 
@@ -23,7 +24,7 @@ createConnection({
     app.use(bodyParser.json());
     app.use(bodyParser.urlencoded({ extended: false }));
 
-    app.post('/webhook', (req, res) => {
+    app.post('/webhook', async (req, res) => {
       const plan = req.body as Plan;
       if (!plan.amount) {
         return res.status(422).json({
@@ -41,7 +42,13 @@ createConnection({
           .json({ message: "Plan must contain an interval of 'month' or 'year'" });
       }
 
-      return res.json(req.body);
+      try {
+        await createPlan(plan);
+        res.status(200).end();
+      } catch (e) {
+        console.log(e);
+        res.status(422).send(e.message);
+      }
     });
 
     app.listen(3000);
