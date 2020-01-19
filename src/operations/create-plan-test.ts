@@ -48,5 +48,43 @@ describe('createPlan', () => {
         expect(plans).toHaveLength(1);
       });
     });
+
+    describe('when the plan already exists in our database', () => {
+      const req: PlanRequest = {
+        amount: 5000,
+        currency: 'usd',
+        interval: 'month',
+        email: 'foobar@example.com',
+      };
+
+      beforeEach(() => {
+        const repo = getRepository(Plan);
+        const existingPlan = new Plan();
+        existingPlan.amount = req.amount;
+        existingPlan.currency = req.currency;
+        existingPlan.interval = req.interval;
+        existingPlan.name = planName(req);
+        return repo.save(existingPlan);
+      });
+
+      it('should not create a new plan', async () => {
+        const client = stripeClient();
+        client.plans.create = jest.fn().mockResolvedValue({});
+
+        const req: PlanRequest = {
+          amount: 5000,
+          currency: 'usd',
+          interval: 'month',
+          email: 'foobar@example.com',
+        };
+
+        await createPlan(req);
+
+        const repo = getRepository(Plan);
+        const plans = await repo.find({ name: planName(req) });
+        console.log(plans);
+        expect(plans).toHaveLength(1);
+      });
+    });
   });
 });
