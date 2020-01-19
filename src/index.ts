@@ -57,7 +57,7 @@ createConnection({
       }
 
       try {
-        await createPlanForSalesperson(plan);
+        createPlanForSalesperson(plan);
         res.status(200).end();
       } catch (e) {
         console.log(e);

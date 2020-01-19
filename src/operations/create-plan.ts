@@ -42,15 +42,20 @@ class EmailInvalidError extends Error {
   }
 }
 
-export async function createPlanForSalesperson(req: PlanRequest) {
-  try {
-    await createPlan(req);
+export function createPlanForSalesperson(req: PlanRequest) {
+  if (!validateEmail(req.email)) {
+    /* Fail fast if the email isn't valid */
+    throw new EmailInvalidError(req.email);
+  }
 
-    /* Here we would email the salesperson, but for now we can log
-     * this to the console.
-     */
+  /* Otherwise, this is an async operation */
+  createPlan(req)
+    .then(() => {
+      /* Here we would email the salesperson, but for now we can log
+       * this to the console.
+       */
 
-    console.log(`
+      console.log(`
       Thank you ${req.email}, the plan you requested is valid and
       available for use.
 
@@ -58,29 +63,22 @@ export async function createPlanForSalesperson(req: PlanRequest) {
       Currency: ${req.currency}
       Interval: ${req.interval}
     `);
-  } catch (e) {
-    if (e instanceof EmailInvalidError) {
-      /* If the email is invalid, we obviously cannot communicate this
-       * failure by email, so we re-throw the error
+    })
+    .catch(e => {
+      /* Any errors from createPlan can be communicated by email, so we don't need
+       * to fail. We will email the salesperson informing them that their
+       * request failed, and communicate the reason for failure.
        */
 
-      throw e;
-    }
-
-    /* All other errors can be communicated by email, so we don't need
-     * to fail. We will email the salesperson informing them that their
-     * request failed, and communicate the reason for failure.
-     */
-
-    console.log(`
+      console.log(`
       Sorry ${req.email}, we were unable to create your plan for the
       following reason:
 
       ${e.message}
     `);
 
-    return;
-  }
+      return;
+    });
 }
 
 export async function createPlan(req: PlanRequest) {
