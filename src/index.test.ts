@@ -2,6 +2,14 @@ import request from 'supertest';
 import { createConnection, getConnection } from 'typeorm';
 
 import app from './server';
+import stripeClient from './utils/stripe';
+import { PlanRequest } from './operations/create-plan';
+
+jest.mock('./utils/stripe', () => () => ({
+  plans: {
+    create: jest.fn(),
+  },
+}));
 
 describe('webhook', () => {
   beforeEach(() => {
@@ -111,6 +119,30 @@ describe('webhook', () => {
 
       expect(res.status).toBe(422);
       expect(res.body.message).toEqual('foobar is not a valid email address');
+    });
+  });
+
+  describe('a valid plan request', () => {
+    it('should succeed', async () => {
+      const client = stripeClient();
+      client.plans.create = jest.fn().mockResolvedValue({});
+
+      const req: PlanRequest = {
+        amount: 5000,
+        currency: 'usd',
+        interval: 'month',
+        email: 'foobar@example.com',
+      };
+
+      const res = await request(app)
+        .post('/webhook')
+        .send(req);
+
+      expect(res.status).toBe(200);
+      //const repo = getRepository(Plan);
+      //const plans = await repo.find({ name: planName(req) });
+      //console.log(plans);
+      //expect(plans).toHaveLength(1);
     });
   });
 });

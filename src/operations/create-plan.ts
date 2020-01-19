@@ -1,5 +1,4 @@
 import { getRepository } from 'typeorm';
-import StripeClient from 'stripe';
 import { validate as validateEmail } from 'email-validator';
 
 import { Plan } from '../entity/Plan';
@@ -23,7 +22,7 @@ export interface PlanRequest {
   email?: string;
 }
 
-function planName(req: PlanRequest) {
+export function planName(req: PlanRequest) {
   return `${req.amount}-${req.currency}-${req.interval}`;
 }
 
