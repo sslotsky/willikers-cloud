@@ -83,10 +83,6 @@ export function createPlanForSalesperson(req: PlanRequest) {
 }
 
 export async function createPlan(req: PlanRequest) {
-  if (!validateEmail(req.email)) {
-    throw new EmailInvalidError(req.email);
-  }
-
   const repo = getRepository(Plan);
 
   const matchingPlans = await repo.find({ name: planName(req) });
