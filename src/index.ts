@@ -41,6 +41,12 @@ createConnection({
           .json({ message: "Plan must contain an interval of 'month' or 'year'" });
       }
 
+      if (!plan.email) {
+        return res
+          .status(422)
+          .json({ message: 'Please specify an email for the salesperson requesting the plan' });
+      }
+
       try {
         await createPlan(plan);
         res.status(200).end();

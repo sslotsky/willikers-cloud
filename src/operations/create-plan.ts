@@ -1,5 +1,6 @@
 import { getRepository } from 'typeorm';
-import StripeClient, { Stripe } from 'stripe';
+import StripeClient from 'stripe';
+import { validate as validateEmail } from 'email-validator';
 
 import { Plan } from '../entity/Plan';
 
@@ -23,6 +24,10 @@ async function savePlan(req: PlanRequest) {
 }
 
 export default async function createPlan(req: PlanRequest) {
+  if (!validateEmail(req.email)) {
+    throw new Error('Email address is not valid');
+  }
+
   const repo = getRepository(Plan);
 
   const matchingPlans = await repo.find({ name: planName(req) });
