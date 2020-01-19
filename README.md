@@ -1,6 +1,18 @@
 # Willikers Cloud
 
-Steps to run this project:
+## Running the project
+
+First, you'll have to create a `.env` file with the following variables:
+
+```
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=your_username
+DB_PASS=your_password
+STRIPE_SECRET=your_stripe_api_secret
+```
+
+Then you can run the project:
 
 1. Run `npm i` command
 1. Run `npm start` command
